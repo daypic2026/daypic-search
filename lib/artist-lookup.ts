@@ -29,6 +29,8 @@ export async function findArtistRow(
     .from("artists")
     .select("*")
     .eq(column, id)
+    .order("created_at", { ascending: true })
+    .limit(1)
     .maybeSingle();
 
   if (error) throw new Error(`작가 조회 실패: ${error.message}`);
