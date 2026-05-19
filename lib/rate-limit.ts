@@ -57,6 +57,7 @@ export const rateLimiters = {
   // anon / 인증 공통. IP 당.
   search: buildLimiter(redis, 60, "1 m", "search"),
   auth: buildLimiter(redis, 10, "1 m", "auth"),
+  view: buildLimiter(redis, 5, "1 m", "view"),
   // 인증 필요. 작가(=kakaoId) 당.
   cloudinarySign: buildLimiter(redis, 20, "1 m", "cloudinary"),
   mutation: buildLimiter(redis, 30, "1 m", "mutation"),

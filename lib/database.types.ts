@@ -34,6 +34,7 @@ export type Database = {
           style_keywords: string[] | null
           updated_at: string | null
           user_id: string | null
+          view_count: number | null
         }
         Insert: {
           artist_type?: string | null
@@ -54,6 +55,7 @@ export type Database = {
           style_keywords?: string[] | null
           updated_at?: string | null
           user_id?: string | null
+          view_count?: number | null
         }
         Update: {
           artist_type?: string | null
@@ -74,6 +76,7 @@ export type Database = {
           style_keywords?: string[] | null
           updated_at?: string | null
           user_id?: string | null
+          view_count?: number | null
         }
         Relationships: []
       }
@@ -240,6 +243,12 @@ export type Database = {
       }
     }
     Functions: {
+      increment_artist_view_count: {
+        Args: {
+          p_id: string
+        }
+        Returns: number
+      }
       register_artist: {
         Args: {
           p_email: string

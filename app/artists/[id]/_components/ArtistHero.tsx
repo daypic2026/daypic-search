@@ -17,6 +17,7 @@ type Props = {
   onToggleFavorite: () => void;
   videoArtist: boolean;
   videoLinks: string[];
+  viewCount: number;
 };
 
 export default function ArtistHero({
@@ -28,6 +29,7 @@ export default function ArtistHero({
   onToggleFavorite,
   videoArtist,
   videoLinks,
+  viewCount,
 }: Props) {
   return (
     <section className="overflow-hidden rounded-[32px] border border-[#ece4f4] bg-white shadow-[0_18px_44px_rgba(80,60,120,0.08)]">
@@ -60,6 +62,13 @@ export default function ArtistHero({
         </div>
 
         <div className="p-6 md:p-8">
+          <div className="mb-2 flex items-center gap-1.5">
+            <img src="/view-cnt.svg" alt="" className="h-4 w-4" />
+            <span className="text-[12px] text-[#8f84a8]">
+              {viewCount.toLocaleString()}
+            </span>
+          </div>
+
           <p className="inline-flex rounded-full bg-[#f3ecff] px-3 py-1 text-[12px] font-semibold text-[#7b5cf6]">
             DAYPIC ARTIST
           </p>

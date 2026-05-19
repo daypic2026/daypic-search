@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useArtistDetail } from "@/lib/queries/artist";
@@ -55,6 +55,8 @@ export default function ArtistDetailPage() {
   const [imageError, setImageError] = useState(false);
   const [recentArtists, setRecentArtists] = useState<SavedArtist[]>([]);
   const [favoriteArtists, setFavoriteArtists] = useState<SavedArtist[]>([]);
+  const [viewCount, setViewCount] = useState(0);
+  const viewCounted = useRef(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -63,6 +65,26 @@ export default function ArtistDetailPage() {
     setRecentArtists(parseStorage<SavedArtist[]>(RECENT_STORAGE_KEY, []));
     setFavoriteArtists(parseStorage<SavedArtist[]>(FAVORITE_STORAGE_KEY, []));
   }, []);
+
+  // 초기 view_count 세팅 (GET 응답 기준)
+  useEffect(() => {
+    if (!artist) return;
+    setViewCount(artist.view_count ?? 0);
+  }, [artist]);
+
+  // 페이지 진입 시 1회 조회수 증가 후 화면 갱신
+  useEffect(() => {
+    if (!artist || viewCounted.current) return;
+    viewCounted.current = true;
+    fetch(`/api/artists/${artistId}/view`, { method: "POST" })
+      .then((res) => res.json())
+      .then((body) => {
+        if (body.ok && typeof body.view_count === "number") {
+          setViewCount(body.view_count);
+        }
+      })
+      .catch(() => {});
+  }, [artist, artistId]);
 
   useEffect(() => {
     if (!artist || typeof window === "undefined") return;
@@ -179,22 +201,7 @@ export default function ArtistDetailPage() {
   return (
     <main className="min-h-screen bg-[#f8f5fb] px-5 py-8 pb-24 text-[#25213d] md:px-8 md:pb-8">
       <div className="mx-auto max-w-[1450px]">
-        <div className="mb-6 flex items-center justify-between">
-          <Link
-            href="/"
-            className="rounded-[14px] border border-[#e6ddf2] bg-white px-5 py-3 text-[14px] font-semibold text-[#5f587a]"
-          >
-            홈으로
-          </Link>
 
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="rounded-[14px] border border-[#e6ddf2] bg-white px-5 py-3 text-[14px] font-semibold text-[#5f587a]"
-          >
-            뒤로가기
-          </button>
-        </div>
 
         <div className="grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
           <ArtistSidebar
@@ -213,6 +220,7 @@ export default function ArtistDetailPage() {
               onToggleFavorite={toggleFavorite}
               videoArtist={videoArtist}
               videoLinks={videoLinks}
+              viewCount={viewCount}
             />
 
             <ArtistPortfolio

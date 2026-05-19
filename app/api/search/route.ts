@@ -30,6 +30,7 @@ type Artist = {
   portfolio_images?: string[];
   artist_type?: string;
   video_portfolio_items?: VideoPortfolioItem[];
+  view_count?: number;
 };
 
 function normalizeText(value: string): string {
@@ -65,11 +66,12 @@ function artistRowToResponse(
     portfolio_images: row.portfolio_images ?? [],
     artist_type: row.artist_type ?? "",
     video_portfolio_items: items,
+    view_count: row.view_count ?? 0,
   };
 }
 
 const ARTIST_COLUMNS =
-  "id, name, service, region, price, portfolio, image, rating, style_keywords, open_chat_url, portfolio_images, artist_type";
+  "id, name, service, region, price, portfolio, image, rating, style_keywords, open_chat_url, portfolio_images, artist_type, view_count";
 
 async function searchArtists(
   date: string,

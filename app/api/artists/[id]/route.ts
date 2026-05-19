@@ -75,6 +75,7 @@ function normalizeArtist(
     rating: typeof row.rating === "number" ? row.rating : null,
     video_portfolio_items: items,
     updated_at: row.updated_at ?? null,
+    view_count: row.view_count ?? 0,
   };
 
   if (!opts.isOwner) return base;

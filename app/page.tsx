@@ -253,7 +253,7 @@ export default function HomePage() {
           </section>
 
           <section className="mt-20">
-            <div className="max-w-6xl mx-auto px-6">
+            <div className="max-w-6xl mx-auto ">
               <div className="text-center">
                 <p className="text-[16px] font-semibold tracking-[0.08em] text-[#8a7eb0]">
                   DAYPIC POINT
@@ -373,9 +373,57 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+              <div className="mt-[24px]  md:mt-[50px] grid md:grid-cols-2 gap-4 self-start    mx-auto">
+
+
+                <Link
+                  type="button"
+                  href="/checklist"
+                  className="flex min-h-[122px] items-center gap-4 rounded-[28px] border border-[#eee3f7] bg-white/95 p-5 text-left shadow-[0_14px_30px_rgba(83,63,125,0.08)]"
+                >
+                  <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#845ef7] to-[#dc68b7] text-[26px] text-white">
+                    ✓
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#9d91b4]">
+                      Checklist
+                    </p>
+                    <p className="mt-1 text-[24px] font-black tracking-[-0.05em] text-[#2c2646]">
+                      결혼준비 체크리스트
+                    </p>
+                    <p className="mt-1 text-[14px] text-[#786f92]">
+                      준비 항목을 한 번에 확인할 수 있어요
+                    </p>
+                  </div>
+                </Link>
+
+                <Link
+                  type="button"
+                  href="/tips"
+                  className="flex min-h-[122px] items-center gap-4 rounded-[28px] border border-[#eee3f7] bg-white/95 p-5 text-left shadow-[0_14px_30px_rgba(83,63,125,0.08)]"
+                >
+                  <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#8a63ff] to-[#f064b7] text-[26px] text-white">
+                    ✦
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#9d91b4]">
+                      Tips
+                    </p>
+                    <p className="mt-1 text-[24px] font-black tracking-[-0.05em] text-[#2c2646]">
+                      더 완벽한 결혼식을 위한 꿀팁
+                    </p>
+                    <p className="mt-1 text-[14px] text-[#786f92]">
+                      예산, 촬영 준비, 동선 팁까지 확인
+                    </p>
+                  </div>
+                </Link>
+              </div>
             </div>
           </section>
+
         </section>
+
+
 
         <section className="mt-16">
           <h2 className="text-center text-[34px] font-black tracking-[-0.05em] text-[#2c2646]">
@@ -431,7 +479,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        <footer className="mt-8 rounded-[26px] border border-[#e8def4] bg-white px-5 py-5 shadow-[0_10px_26px_rgba(60,50,100,0.05)] md:px-8">
+
+
+        <div className="mt-8 rounded-[26px] border border-[#e8def4] bg-white px-5 py-5 shadow-[0_10px_26px_rgba(60,50,100,0.05)] md:px-8">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-3">
               <img
@@ -462,7 +512,9 @@ export default function HomePage() {
               </a>
             </div>
           </div>
-        </footer>
+        </div>
+
+
       </div>
 
       <a

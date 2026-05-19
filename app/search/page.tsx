@@ -29,6 +29,7 @@ type Artist = {
   portfolio_images?: string[];
   artist_type?: string;
   video_portfolio_items?: VideoPortfolioItem[];
+  view_count?: number;
 };
 
 type SavedArtist = {
@@ -44,7 +45,7 @@ type SavedArtist = {
 type SearchPageState = {
   scrollY: number;
 };
- 
+
 const SERVICES = ["본식스냅", "서브스냅", "영상촬영", "아이폰스냅", "돌스냅", "야외스냅", "스튜디오촬영", '해외촬영', '커플스냅'];
 
 const REGIONS = [
@@ -154,6 +155,7 @@ function normalizeArtistFromApi(rawArtist: Record<string, unknown>): Artist {
     portfolio_images: normalizeArray(portfolioImagesValue),
 
     artist_type: String(rawArtist.artist_type ?? ""),
+    view_count: typeof rawArtist.view_count === "number" ? rawArtist.view_count : 0,
     video_portfolio_items: Array.isArray(rawArtist.video_portfolio_items)
       ? (rawArtist.video_portfolio_items as Array<Record<string, unknown>>).map(
         (item) => ({
@@ -356,9 +358,97 @@ function SearchResultsGrid({
                   className="group block cursor-pointer overflow-hidden rounded-[26px] border border-[#e8dff3] bg-white shadow-[0_8px_24px_rgba(60,50,100,0.06)] transition hover:-translate-y-[4px] hover:shadow-[0_22px_40px_rgba(60,50,100,0.12)]"
                 >
                   <article>
+                    <div className="relative aspect-[16/10] overflow-hidden bg-[#f1ebf8]">
+                      <img
+                        src={artist.videoCardThumb || artist.image}
+                        alt={artist.name}
+                        className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.05]"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (img.src.endsWith(PLACEHOLDER_IMAGE)) return;
+                          img.src = PLACEHOLDER_IMAGE;
+                        }}
+                      />
+                      <div className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                        VIDEO PORTFOLIO
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onFavoriteToggle(e, artist);
+                        }}
+                        className={`absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-sm ${favorite ? "border-[#ffbdd4] bg-[#ffedf5] text-[#ff5c9a]" : "border-white/70 bg-white/85 text-[#6a617f]"}`}
+                        aria-label={favorite ? "찜 해제" : "찜하기"}
+                      >
+                        {favorite ? "❤" : "♡"}
+                      </button>
+                      <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 backdrop-blur-sm">
+                        <img src="/view-cnt.svg" alt="" className="h-3 w-3" />
+                        <span className="text-[11px] text-white/80">
+                          {(artist.view_count ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                      {primaryVideoLink && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onScrollSave(window.scrollY);
+                            onSaveRecent(artist);
+                            window.open(primaryVideoLink, "_blank", "noopener,noreferrer");
+                          }}
+                          className="absolute bottom-3 right-3 z-10 rounded-full bg-white/90 px-4 py-2 text-[12px] font-bold text-[#4f3ccf] shadow-sm"
+                        >
+                          영상 보기
+                        </button>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#272347]">{artist.name}</h3>
+                      <p className="mt-1 truncate text-[13px] text-[#6a6384]">{joinLabel(artist.region)}</p>
+                      <p className="mt-1 truncate text-[13px] text-[#8d63ff]">{joinLabel(artist.service)}</p>
+                      <p className="mt-3 text-[14px] font-semibold text-[#4b4468]">{artist.price}</p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {artist.style_keywords?.slice(0, 4).map((keyword) => (
+                          <span key={keyword} className="rounded-full bg-[#f2ebff] px-2.5 py-1 text-[11px] font-medium text-[#7652ea]">{keyword}</span>
+                        ))}
+                      </div>
+                      <div className="mt-4 grid grid-cols-2 gap-2">
+                        <span className="flex h-10 items-center justify-center rounded-[14px] bg-[#f3effb] text-[13px] font-semibold text-[#5b47c8]">상세페이지</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!primaryVideoLink) return;
+                            onScrollSave(window.scrollY);
+                            onSaveRecent(artist);
+                            window.open(primaryVideoLink, "_blank", "noopener,noreferrer");
+                          }}
+                          disabled={!primaryVideoLink}
+                          className={`h-10 rounded-[14px] text-[13px] font-semibold ${primaryVideoLink ? "bg-[#6d46f6] text-white" : "bg-[#ece8f6] text-[#9a93b1]"}`}
+                        >{primaryVideoLink ? "영상 포트폴리오" : "준비중"}</button>
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+              );
+            }
+
+            return (
+              <Link
+                key={String(artist.id)}
+                href={`/artists/${String(artist.id)}`}
+                ref={isTriggerCard ? setTriggerCardEl : null}
+                onClick={() => onArtistClick(artist)}
+                className="group block cursor-pointer overflow-hidden rounded-[26px] border border-[#e8dff3] bg-white shadow-[0_8px_24px_rgba(60,50,100,0.06)] transition hover:-translate-y-[4px] hover:shadow-[0_22px_40px_rgba(60,50,100,0.12)]"
+              >
+                <article>
                   <div className="relative aspect-[16/10] overflow-hidden bg-[#f1ebf8]">
                     <img
-                      src={artist.videoCardThumb || artist.image}
+                      src={artist.image}
                       alt={artist.name}
                       className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.05]"
                       onError={(e) => {
@@ -367,9 +457,6 @@ function SearchResultsGrid({
                         img.src = PLACEHOLDER_IMAGE;
                       }}
                     />
-                    <div className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-                      VIDEO PORTFOLIO
-                    </div>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -381,21 +468,12 @@ function SearchResultsGrid({
                     >
                       {favorite ? "❤" : "♡"}
                     </button>
-                    {primaryVideoLink && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onScrollSave(window.scrollY);
-                          onSaveRecent(artist);
-                          window.open(primaryVideoLink, "_blank", "noopener,noreferrer");
-                        }}
-                        className="absolute bottom-3 right-3 z-10 rounded-full bg-white/90 px-4 py-2 text-[12px] font-bold text-[#4f3ccf] shadow-sm"
-                      >
-                        영상 보기
-                      </button>
-                    )}
+                    <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 backdrop-blur-sm">
+                      <img src="/view-cnt.svg" alt="" className="h-3 w-3" />
+                      <span className="text-[11px] text-white/80">
+                        {(artist.view_count ?? 0).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                   <div className="p-4">
                     <h3 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#272347]">{artist.name}</h3>
@@ -414,80 +492,16 @@ function SearchResultsGrid({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          if (!primaryVideoLink) return;
+                          if (!artist.portfolio) return;
                           onScrollSave(window.scrollY);
                           onSaveRecent(artist);
-                          window.open(primaryVideoLink, "_blank", "noopener,noreferrer");
+                          window.open(artist.portfolio, "_blank", "noopener,noreferrer");
                         }}
-                        disabled={!primaryVideoLink}
-                        className={`h-10 rounded-[14px] text-[13px] font-semibold ${primaryVideoLink ? "bg-[#6d46f6] text-white" : "bg-[#ece8f6] text-[#9a93b1]"}`}
-                      >{primaryVideoLink ? "영상 포트폴리오" : "준비중"}</button>
+                        disabled={!artist.portfolio}
+                        className={`h-10 rounded-[14px] text-[13px] font-semibold ${artist.portfolio ? "bg-[#6d46f6] text-white" : "bg-[#ece8f6] text-[#9a93b1]"}`}
+                      >{artist.portfolio ? "포트폴리오" : "준비중"}</button>
                     </div>
                   </div>
-                  </article>
-                </Link>
-              );
-            }
-
-            return (
-              <Link
-                key={String(artist.id)}
-                href={`/artists/${String(artist.id)}`}
-                ref={isTriggerCard ? setTriggerCardEl : null}
-                onClick={() => onArtistClick(artist)}
-                className="group block cursor-pointer overflow-hidden rounded-[26px] border border-[#e8dff3] bg-white shadow-[0_8px_24px_rgba(60,50,100,0.06)] transition hover:-translate-y-[4px] hover:shadow-[0_22px_40px_rgba(60,50,100,0.12)]"
-              >
-                <article>
-                <div className="relative aspect-[16/10] overflow-hidden bg-[#f1ebf8]">
-                  <img
-                    src={artist.image}
-                    alt={artist.name}
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.05]"
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      if (img.src.endsWith(PLACEHOLDER_IMAGE)) return;
-                      img.src = PLACEHOLDER_IMAGE;
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onFavoriteToggle(e, artist);
-                    }}
-                    className={`absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur-sm ${favorite ? "border-[#ffbdd4] bg-[#ffedf5] text-[#ff5c9a]" : "border-white/70 bg-white/85 text-[#6a617f]"}`}
-                    aria-label={favorite ? "찜 해제" : "찜하기"}
-                  >
-                    {favorite ? "❤" : "♡"}
-                  </button>
-                </div>
-                <div className="p-4">
-                  <h3 className="truncate text-[19px] font-bold tracking-[-0.03em] text-[#272347]">{artist.name}</h3>
-                  <p className="mt-1 truncate text-[13px] text-[#6a6384]">{joinLabel(artist.region)}</p>
-                  <p className="mt-1 truncate text-[13px] text-[#8d63ff]">{joinLabel(artist.service)}</p>
-                  <p className="mt-3 text-[14px] font-semibold text-[#4b4468]">{artist.price}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {artist.style_keywords?.slice(0, 4).map((keyword) => (
-                      <span key={keyword} className="rounded-full bg-[#f2ebff] px-2.5 py-1 text-[11px] font-medium text-[#7652ea]">{keyword}</span>
-                    ))}
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <span className="flex h-10 items-center justify-center rounded-[14px] bg-[#f3effb] text-[13px] font-semibold text-[#5b47c8]">상세페이지</span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (!artist.portfolio) return;
-                        onScrollSave(window.scrollY);
-                        onSaveRecent(artist);
-                        window.open(artist.portfolio, "_blank", "noopener,noreferrer");
-                      }}
-                      disabled={!artist.portfolio}
-                      className={`h-10 rounded-[14px] text-[13px] font-semibold ${artist.portfolio ? "bg-[#6d46f6] text-white" : "bg-[#ece8f6] text-[#9a93b1]"}`}
-                    >{artist.portfolio ? "포트폴리오" : "준비중"}</button>
-                  </div>
-                </div>
                 </article>
               </Link>
             );
@@ -763,15 +777,6 @@ function SearchPageContent() {
     router.push(`/search?${params.toString()}`);
   }
 
-  function handleChecklistClick() {
-    saveSearchPageState(window.scrollY);
-    router.push("/checklist");
-  }
-
-  function handleTipsClick() {
-    saveSearchPageState(window.scrollY);
-    router.push("/tips");
-  }
 
   return (
     <main className="min-h-screen bg-[#faf7fc] text-[#251f3c]">
@@ -779,8 +784,8 @@ function SearchPageContent() {
 
       <div className="mx-auto max-w-[1540px] px-5 pb-12 pt-6 md:px-8 md:pt-8">
         <section className="relative rounded-[40px] border border-[#eee5f7] bg-[radial-gradient(circle_at_top_left,_rgba(164,133,255,0.18),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(244,170,214,0.18),_transparent_25%),linear-gradient(135deg,_#ffffff_0%,_#fcf9ff_45%,_#f8f3fb_100%)] p-5 shadow-[0_18px_50px_rgba(95,71,147,0.08)] md:p-8 xl:p-10">
-          <div className="grid gap-6 xl:grid-cols-[1.1fr_0.95fr]">
-            <div className="max-w-[700px]">
+          <div className="grid gap-6 ">
+            <div className=" ">
               <p className="mb-3 inline-flex rounded-full border border-[#eadff8] bg-white/80 px-4 py-2 text-[12px] font-semibold text-[#7a5cf6] shadow-sm">
                 DAYPIC SEARCH
               </p>
@@ -796,8 +801,8 @@ function SearchPageContent() {
                 데이픽에서 예식 분위기에 맞는 작가를 바로 찾아봐요.
               </p>
 
-              <div className="mt-7 max-w-[580px] rounded-[28px] border border-[#eee4f7] bg-white/95 p-4 shadow-[0_16px_36px_rgba(94,72,145,0.10)] md:p-5">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div className="mt-7  rounded-[28px] border border-[#eee4f7] bg-white/95 p-4 shadow-[0_16px_36px_rgba(94,72,145,0.10)] md:p-5">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                   <div className="flex flex-col gap-2">
                     <label className="px-1 text-[13px] font-semibold text-[#7a7297]">
                       예식 날짜
@@ -991,71 +996,11 @@ function SearchPageContent() {
               </div>
             </div>
 
-            <div className="grid gap-4 self-start">
-              <div className="flex min-h-[122px] items-center gap-4 rounded-[28px] border border-[#eee3f7] bg-white/95 p-5 shadow-[0_14px_30px_rgba(83,63,125,0.08)]">
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#7b5cf6] to-[#b060ff] text-[28px] text-white">
-                  👤
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#9d91b4]">
-                    Registered
-                  </p>
-                  <p className="mt-1 text-[24px] font-black tracking-[-0.05em] text-[#2c2646]">
-                    조건 맞는 작가 <span className="text-[#8a63ff]">{resultCountLabel}</span>
-                  </p>
-                  <p className="mt-1 text-[14px] text-[#786f92]">
-                    검색 결과 기준으로 바로 확인 가능
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleChecklistClick}
-                className="flex min-h-[122px] items-center gap-4 rounded-[28px] border border-[#eee3f7] bg-white/95 p-5 text-left shadow-[0_14px_30px_rgba(83,63,125,0.08)]"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#845ef7] to-[#dc68b7] text-[26px] text-white">
-                  ✓
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#9d91b4]">
-                    Checklist
-                  </p>
-                  <p className="mt-1 text-[24px] font-black tracking-[-0.05em] text-[#2c2646]">
-                    결혼준비 체크리스트
-                  </p>
-                  <p className="mt-1 text-[14px] text-[#786f92]">
-                    준비 항목을 한 번에 확인할 수 있어요
-                  </p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleTipsClick}
-                className="flex min-h-[122px] items-center gap-4 rounded-[28px] border border-[#eee3f7] bg-white/95 p-5 text-left shadow-[0_14px_30px_rgba(83,63,125,0.08)]"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-gradient-to-br from-[#8a63ff] to-[#f064b7] text-[26px] text-white">
-                  ✦
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#9d91b4]">
-                    Tips
-                  </p>
-                  <p className="mt-1 text-[24px] font-black tracking-[-0.05em] text-[#2c2646]">
-                    더 완벽한 결혼식을 위한 꿀팁
-                  </p>
-                  <p className="mt-1 text-[14px] text-[#786f92]">
-                    예산, 촬영 준비, 동선 팁까지 확인
-                  </p>
-                </div>
-              </button>
-            </div>
           </div>
         </section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-[104px] lg:self-start">
+          <aside className="hidden lg:block lg:sticky lg:top-[104px] lg:self-start">
             <div className="rounded-[24px] border border-[#e8e0f3] bg-[#f7f3fb] p-4 shadow-[0_10px_26px_rgba(80,60,120,0.05)]">
               <div
                 onClick={() => setRecentOpen((prev) => !prev)}
@@ -1116,7 +1061,7 @@ function SearchPageContent() {
             <div className="mb-4 flex flex-col gap-3 border-b border-[#e7e0f0] pb-4 md:flex-row md:items-start md:justify-between">
               <div>
                 <p className="text-[22px] font-black tracking-[-0.04em] text-[#2a2645]">
-                  검색 결과
+                  검색 결과 <span className="text-[#6d46f6]">{resultCountLabel}</span>
                 </p>
                 <p className="mt-2 text-[15px] text-[#6f6886]">{message}</p>
               </div>

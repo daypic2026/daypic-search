@@ -22,6 +22,7 @@ export type ArtistDetail = {
   portfolio_images?: string[] | string;
   artist_type?: string;
   video_portfolio_items?: VideoPortfolioItem[];
+  view_count?: number;
 };
 
 export type SavedArtist = {
