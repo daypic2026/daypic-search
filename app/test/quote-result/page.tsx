@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
   HelpCircle,
-  Plus,
-  RotateCcw,
   Sparkles,
 } from "lucide-react";
 
@@ -45,11 +44,12 @@ type StandardField = {
   note: string;
 };
 
-type AnalysisCard = {
+type OptionItem = {
+  id: string;
   title: string;
-  value: string;
+  price: string;
   desc: string;
-  level: "good" | "check" | "neutral";
+  risk?: "low" | "medium" | "high";
 };
 
 const fallbackPreferences: PreferenceItem[] = [
@@ -62,88 +62,133 @@ const fallbackPreferences: PreferenceItem[] = [
 
 const standardFields: StandardField[] = [
   {
-    id: "price",
-    label: "총 견적가",
+    id: "base-price",
+    label: "기본 견적",
     value: "95만원",
     status: "confirmed",
-    note: "견적서에 명시됨",
+    note: "스냅 + 영상 기준으로 확인됨",
   },
   {
-    id: "snap",
-    label: "스냅 촬영",
-    value: "55만원",
+    id: "shooting-person",
+    label: "촬영 인원",
+    value: "1인",
     status: "confirmed",
-    note: "가격 확인됨",
+    note: "메인 작가 1인 촬영 기준",
   },
   {
-    id: "video",
-    label: "영상 촬영",
-    value: "40만원",
+    id: "shooting-range",
+    label: "촬영 범위",
+    value: "신부대기실~원판",
     status: "confirmed",
-    note: "4K 2CAM 구성 확인됨",
-  },
-  {
-    id: "iphone",
-    label: "아이폰스냅",
-    value: "25만원",
-    status: "confirmed",
-    note: "가격 및 제공 범위 확인됨",
+    note: "기본 촬영 범위 확인됨",
   },
   {
     id: "raw",
-    label: "원본 수량",
-    value: "약 800장 전달",
+    label: "원본 제공",
+    value: "전체 제공",
     status: "confirmed",
-    note: "2,000장 이상 촬영 후 선별 전달",
+    note: "원본 파일 제공 명시",
   },
   {
     id: "retouch",
-    label: "수정본",
+    label: "보정본",
     value: "40장",
     status: "confirmed",
-    note: "수정본 수량 명시됨",
-  },
-  {
-    id: "delivery",
-    label: "원본 전달일",
-    value: "당일~최대 5일",
-    status: "confirmed",
-    note: "클라우드 전달 명시됨",
+    note: "정밀 보정본 수량 확인됨",
   },
   {
     id: "album",
     label: "앨범",
-    value: "별도 추가",
+    value: "별도",
     status: "check",
-    note: "20p 6만원 / 50p 15만원",
+    note: "앨범 추가 시 별도 비용 발생",
+  },
+  {
+    id: "delivery",
+    label: "납품 일정",
+    value: "원본 2~3주",
+    status: "confirmed",
+    note: "보정본은 셀렉 후 약 60일",
   },
   {
     id: "contract",
     label: "계약서",
-    value: "미확인",
-    status: "missing",
-    note: "견적서에 명시되지 않음",
+    value: "있음",
+    status: "confirmed",
+    note: "계약서 작성 및 계약금 조건 명시",
   },
   {
     id: "refund",
     label: "환불 규정",
-    value: "미확인",
-    status: "missing",
-    note: "취소 및 환불 기준 확인 필요",
+    value: "있음",
+    status: "confirmed",
+    note: "취소 시점별 위약금 기준 명시",
   },
   {
     id: "travel-fee",
     label: "출장비",
-    value: "미확인",
-    status: "missing",
-    note: "지역별 추가비 여부 확인 필요",
+    value: "별도",
+    status: "check",
+    note: "지역별 출장비 추가 가능",
   },
   {
     id: "storage",
-    label: "원본 보관기간",
-    value: "미확인",
-    status: "missing",
-    note: "클라우드 보관기간 확인 필요",
+    label: "원본 보관",
+    value: "3개월",
+    status: "confirmed",
+    note: "최종 납품 완료일 기준",
+  },
+  {
+    id: "correction-range",
+    label: "보정 범위",
+    value: "확인 필요",
+    status: "check",
+    note: "피부, 체형, 색감 보정 범위 확인 필요",
+  },
+];
+
+const optionItems: OptionItem[] = [
+  {
+    id: "main-photographer",
+    title: "대표 지정",
+    price: "+30만원",
+    desc: "대표 작가 촬영을 원하는 경우 추가",
+    risk: "medium",
+  },
+  {
+    id: "two-person",
+    title: "2인 촬영 전환",
+    price: "+40만원",
+    desc: "다양한 각도와 하객 스케치 보완",
+    risk: "medium",
+  },
+  {
+    id: "makeup-shop",
+    title: "메이크업샵 촬영",
+    price: "+20만원",
+    desc: "식전 3시간 전부터 촬영 시작",
+    risk: "low",
+  },
+  {
+    id: "reception",
+    title: "연회장 또는 폐백",
+    price: "+10만원",
+    desc: "기본 촬영 범위 외 추가 촬영",
+    risk: "low",
+  },
+  {
+    id: "parent-album",
+    title: "부모님 앨범",
+    price: "+15만원",
+    desc: "1권당 추가 비용",
+    risk: "medium",
+  },
+  {
+    id: "travel-fee",
+    title: "출장비",
+    price: "+5~30만원",
+    desc: "지역에 따라 추가 발생",
+    risk: "high",
   },
 ];
 
@@ -201,54 +246,27 @@ export default function QuoteResultPage() {
     (item) => item.status === "confirmed"
   );
 
+  const checkItems = standardFields.filter((item) => item.status === "check");
+
   const missingItems = standardFields.filter(
     (item) => item.status === "missing"
   );
 
-  const checkItems = standardFields.filter((item) => item.status === "check");
-
-  const analysisCards: AnalysisCard[] = [
-    {
-      title: "가격",
-      value: "명확함",
-      desc: "스냅, 영상, 아이폰스냅, 패키지 비용이 각각 구분되어 있어요.",
-      level: "good",
-    },
-    {
-      title: "결과물 구성",
-      value: "충분함",
-      desc: "원본, 전달본, 수정본 수량이 비교적 자세히 적혀 있어요.",
-      level: "good",
-    },
-    {
-      title: "전달 일정",
-      value: "명확함",
-      desc: "원본은 당일 또는 익일, 늦어도 5일 이내 전달로 적혀 있어요.",
-      level: "good",
-    },
-    {
-      title: "계약 조건",
-      value: "확인 필요",
-      desc: "계약서, 환불 규정, 일정 변경 조건은 견적서에 보이지 않아요.",
-      level: "check",
-    },
-  ];
-
   const recommendation = useMemo(() => {
     return {
       level: "진행 검토 가능",
-      desc: `${vendorName} 견적은 가격과 제공 구성은 비교적 명확한 편이에요. 다만 계약서, 환불규정, 출장비처럼 실제 계약 단계에서 중요한 항목은 아직 확인이 필요해요.`,
+      desc: `${vendorName} 견적은 기본 구성과 계약 조건은 비교적 잘 정리되어 있어요. 다만 대표 지정, 2인 촬영, 앨범, 출장비 같은 옵션을 선택하면 실제 결제 금액이 크게 달라질 수 있어요.`,
       action:
-        "바로 결정하기보다는 아래 확인 질문을 업체에 보내고 답변을 받은 뒤 최종 선택하는 것을 추천해요.",
+        "기본 견적만 보고 결정하기보다, 필요한 옵션을 포함했을 때 최종 금액이 얼마인지 확인한 뒤 선택하는 것을 추천해요.",
     };
   }, [vendorName]);
 
   const questions = [
-    "계약서 작성이 가능한가요? 계약서에 포함 항목과 별도 비용이 모두 기재되나요?",
-    "예식 취소나 일정 변경 시 환불 기준은 어떻게 되나요?",
-    "예식 지역에 따라 출장비나 추가 비용이 발생하나요?",
-    "원본 파일은 클라우드에서 몇 일 동안 보관되나요?",
-    "수정본 40장의 보정 범위는 어디까지 포함되나요?",
+    "현재 견적에 출장비가 포함되어 있나요? 예식 지역 기준 최종 금액을 확인할 수 있을까요?",
+    "대표 지정 또는 2인 촬영으로 변경하면 최종 견적은 얼마인가요?",
+    "앨범 추가 시 페이지 수와 최종 비용은 어떻게 계산되나요?",
+    "보정본의 보정 범위는 피부, 체형, 색감 중 어디까지 포함되나요?",
+    "최종 견적과 포함 항목을 계약서에 모두 기재할 수 있나요?",
   ];
 
   return (
@@ -256,6 +274,19 @@ export default function QuoteResultPage() {
       <div className="mx-auto min-h-screen max-w-5xl px-5 pb-52 pt-5 sm:px-8 lg:px-10">
         <section className="relative overflow-hidden rounded-[30px] bg-white px-6 py-7 shadow-sm ring-1 ring-[#ece8f0] sm:px-10 sm:py-10">
           <div className="absolute -right-14 -top-14 h-36 w-36 rounded-full bg-[#f4e8f0]" />
+          <div className="absolute right-8 bottom-10 hidden h-20 w-20 rounded-[28px] bg-[#f7f3fa] sm:block" />
+
+          <div className="absolute right-4 top-16 z-20">
+            <div className="relative h-[86px] w-[112px] sm:h-[140px] sm:w-[185px]">
+              <Image
+                src="/daypic2/character1.png"
+                alt="DayPic 분석 결과 캐릭터"
+                fill
+                priority
+                className="object-contain"
+              />
+            </div>
+          </div>
 
           <div className="relative z-10">
             <div className="flex items-center justify-between gap-3">
@@ -274,55 +305,75 @@ export default function QuoteResultPage() {
               </Link>
             </div>
 
-            <div className="mt-8 sm:mt-10">
-              <p className="text-sm font-black text-[#c46b8d]">
+            <div className="mt-8 max-w-[520px] pr-24 sm:mt-10 sm:pr-44">
+              <p className="text-xs font-black text-[#c46b8d] sm:text-sm">
                 {categoryLabel} 분석 결과
               </p>
 
-              <h1 className="mt-3 text-[28px] font-black leading-[1.22] tracking-[-0.055em] sm:text-[42px]">
-                이 견적에서
+              <h1 className="mt-3 text-[20px] font-black leading-[1.35] tracking-[-0.055em] sm:text-[42px]">
+                기본 견적과
                 <br />
-                <span className="text-[#c46b8d]">확인된 것과 빠진 것</span>
-                을 정리했어요
+                <span className="text-[#c46b8d]">추가 옵션</span>을
+                정리했어요
               </h1>
 
-              <p className="mt-4 max-w-2xl text-[14px] leading-6 text-[#6d6876] sm:text-[16px] sm:leading-7">
-                입력한 견적 내용을 DayPic 표준 항목으로 나누고, 선택 전 꼭
-                확인해야 할 내용을 정리했어요.
+              <p className="mt-4 text-[13px] leading-6 text-[#6d6876] sm:text-[16px] sm:leading-7">
+                복잡한 견적서를 선택 기준으로 바꾸고
+                <br />
+                실제 최종 비용까지 함께 확인해요.
               </p>
             </div>
           </div>
         </section>
 
-        <section className="mt-5 rounded-[30px] bg-[#222237] p-5 text-white shadow-sm sm:p-7">
-          <p className="text-sm font-black text-[#e5a9bf]">AI 한 줄 분석</p>
-          <h2 className="mt-3 text-[22px] font-black leading-[1.4] tracking-[-0.04em]">
-            가격과 구성은 명확하지만,
+        <section className="mt-5 rounded-[26px] bg-[#222237] px-5 py-4 text-white shadow-sm sm:p-6">
+          <p className="text-xs font-black text-[#e5a9bf]">AI 한 줄 분석</p>
+
+          <h2 className="mt-3 text-[18px] font-black leading-[1.3] tracking-[-0.05em] sm:text-[28px]">
+            기본가는 괜찮지만,
             <br />
-            계약 조건은 추가 확인이 필요해요.
+            옵션 포함 최종가를 봐야 해요.
           </h2>
-          <p className="mt-4 text-sm font-bold leading-6 text-white/75">
+
+          <p className="mt-4 text-[13px] font-bold leading-[1.6] text-white/75">
             {recommendation.desc}
+          </p>
+        </section>
+
+        <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
+          <div className="grid grid-cols-2 gap-3">
+            <CostCard title="기본 견적" value="95만원" desc="현재 확인된 기본가" />
+            <CostCard
+              title="옵션 포함 예상"
+              value="145~180만원"
+              desc="대표/2인/앨범/출장비 포함 가능"
+              highlight
+            />
+          </div>
+
+          <p className="mt-4 rounded-[20px] bg-[#f8eef2] px-4 py-3 text-[13px] font-bold leading-6 text-[#4b3f48]">
+            95만원은 기본가에 가깝고, 선택 옵션에 따라 실제 결제 금액은 더
+            높아질 수 있어요.
           </p>
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-black text-[#c46b8d]">
+              <p className="text-xs font-black text-[#c46b8d] sm:text-sm">
                 견적서 완성도
               </p>
-              <h2 className="mt-2 text-[32px] font-black tracking-[-0.06em]">
+              <h2 className="mt-2 text-[28px] font-black tracking-[-0.06em]">
                 {completeness}%
               </h2>
-              <p className="mt-1 text-sm font-bold text-[#6d6876]">
+              <p className="mt-1 text-[12px] font-bold text-[#6d6876]">
                 총 {totalCount}개 표준 항목 중 {confirmedCount}개 확인
               </p>
             </div>
 
-            <div className="rounded-[22px] bg-[#f8eef2] px-4 py-3 text-center text-[#c46b8d]">
-              <p className="text-[11px] font-black">미확인</p>
-              <p className="text-2xl font-black">{missingCount}건</p>
+            <div className="rounded-[20px] bg-[#f8eef2] px-4 py-3 text-center text-[#c46b8d]">
+              <p className="text-[11px] font-black">확인필요</p>
+              <p className="text-2xl font-black">{checkCount}건</p>
             </div>
           </div>
 
@@ -341,6 +392,48 @@ export default function QuoteResultPage() {
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
+          <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em] text-[#c46b8d]">
+            기본 견적 표준표
+          </h2>
+
+          <p className="mt-2 text-[13px] font-bold leading-6 text-[#6d6876]">
+            업체 상품명을 빼고, 선택에 필요한 항목만 정리했어요.
+          </p>
+
+          <div className="mt-5 overflow-hidden rounded-[24px] ring-1 ring-[#ece8f0]">
+            <div className="grid grid-cols-[0.9fr_1.1fr_1.2fr] bg-[#f8eef2] px-3 py-3 text-[11px] font-black text-[#c46b8d]">
+              <div>항목</div>
+              <div className="text-center">내용</div>
+              <div className="text-right">메모</div>
+            </div>
+
+            <div className="divide-y divide-[#f0eaf0] bg-white">
+              {standardFields
+                .filter((item) => item.status !== "missing")
+                .map((item) => (
+                  <StandardTableRow key={item.id} item={item} />
+                ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
+          <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em] text-[#c46b8d]">
+            추가 옵션 정리
+          </h2>
+
+          <p className="mt-2 text-[13px] font-bold leading-6 text-[#6d6876]">
+            실제 최종 비용을 바꾸는 옵션들이에요.
+          </p>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {optionItems.map((item) => (
+              <OptionCard key={item.id} item={item} />
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
           <SectionHeader
             title="AI 해석"
             badge="핵심 4개"
@@ -348,30 +441,37 @@ export default function QuoteResultPage() {
           />
 
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {analysisCards.map((item) => (
-              <AnalysisCard key={item.title} item={item} />
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
-          <SectionHeader
-            title="견적서에서 확인된 항목"
-            badge={`${confirmedItems.length}개`}
-            icon={<CheckCircle2 size={20} />}
-          />
-
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {confirmedItems.map((item) => (
-              <StandardCard key={item.id} item={item} />
-            ))}
+            <AnalysisCard
+              title="기본가"
+              value="명확함"
+              desc="기본 견적과 주요 제공 항목이 비교적 잘 정리되어 있어요."
+              level="good"
+            />
+            <AnalysisCard
+              title="옵션"
+              value="주의"
+              desc="대표 지정, 2인 촬영, 앨범, 출장비에 따라 최종가가 달라져요."
+              level="check"
+            />
+            <AnalysisCard
+              title="계약 규정"
+              value="확인됨"
+              desc="계약금, 잔금일, 취소 시점별 위약금 기준이 명시되어 있어요."
+              level="good"
+            />
+            <AnalysisCard
+              title="최종 비용"
+              value="확인 필요"
+              desc="내가 선택할 옵션을 포함한 최종 견적을 다시 받아야 해요."
+              level="check"
+            />
           </div>
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
           <SectionHeader
             title="추가 확인이 필요한 항목"
-            badge={`${missingItems.length + checkItems.length}개`}
+            badge={`${checkItems.length + missingItems.length}개`}
             icon={<AlertTriangle size={20} />}
           />
 
@@ -383,14 +483,14 @@ export default function QuoteResultPage() {
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
-          <h2 className="text-xl font-black tracking-[-0.04em]">
+          <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em]">
             선택 기준 반영
           </h2>
 
           {preference?.combination && (
             <div className="mt-4 rounded-[22px] bg-[#f8eef2] p-4">
               <p className="text-xs font-black text-[#c46b8d]">선택 조합</p>
-              <p className="mt-1 text-lg font-black">
+              <p className="mt-1 text-[15px] font-black">
                 {preference.combination.title}
               </p>
               <p className="mt-1 text-xs font-bold leading-5 text-[#6d6876]">
@@ -412,22 +512,22 @@ export default function QuoteResultPage() {
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
-          <h2 className="text-xl font-black tracking-[-0.04em]">
+          <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em]">
             최종 의견
           </h2>
 
           <div className="mt-4 rounded-[24px] bg-[#fdfcff] p-5 ring-1 ring-[#ece8f0]">
-            <p className="text-sm font-black text-[#c46b8d]">
+            <p className="text-[13px] font-black text-[#c46b8d]">
               {recommendation.level}
             </p>
-            <p className="mt-3 text-sm font-bold leading-7 text-[#4b3f48]">
+            <p className="mt-3 text-[13px] font-bold leading-7 text-[#4b3f48]">
               {recommendation.action}
             </p>
           </div>
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
-          <h2 className="text-xl font-black tracking-[-0.04em]">
+          <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em]">
             업체에 꼭 확인할 질문
           </h2>
 
@@ -437,63 +537,54 @@ export default function QuoteResultPage() {
             ))}
           </div>
         </section>
-
-        <section className="mt-5 grid grid-cols-2 gap-3">
-          <Link
-            href="/test/quote-add"
-            className="flex h-[58px] items-center justify-center gap-2 rounded-[22px] border border-[#ece8f0] bg-white text-sm font-black text-[#c46b8d] shadow-sm"
-          >
-            <Plus size={18} />
-            견적 추가
-          </Link>
-
-          <Link
-            href="/test/quote-preference"
-            className="flex h-[58px] items-center justify-center gap-2 rounded-[22px] border border-[#ece8f0] bg-white text-sm font-black text-[#c46b8d] shadow-sm"
-          >
-            <RotateCcw size={17} />
-            기준 수정
-          </Link>
-        </section>
       </div>
 
       <div className="fixed bottom-[74px] left-0 right-0 z-40 bg-gradient-to-t from-[#fdfcff] via-[#fdfcff] to-transparent px-5 pb-4 pt-8">
         <div className="mx-auto max-w-5xl">
           <Link
             href="/test/quote-box"
-            className="flex h-[56px] w-full items-center justify-center gap-2 rounded-[22px] bg-[#c46b8d] text-[15px] font-black text-white shadow-lg shadow-[#c46b8d]/25 transition active:scale-[0.98]"
+            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[20px] bg-[#c46b8d] text-[15px] font-black text-white shadow-lg shadow-[#c46b8d]/25 transition active:scale-[0.98]"
           >
-            견적함에 저장하기
+            이 비교 진단서 견적함에 보관하기
             <ArrowRight size={18} />
           </Link>
         </div>
       </div>
-
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#ece8f0] bg-white/95 backdrop-blur">
-        <div className="mx-auto grid max-w-5xl grid-cols-5 px-2 py-2 text-center text-[11px] font-semibold text-[#aaa0aa]">
-          <Link href="/test" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">⌂</div>
-            <div className="mt-1">홈</div>
-          </Link>
-          <Link href="/test/quote-add" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">＋</div>
-            <div className="mt-1">견적추가</div>
-          </Link>
-          <Link href="/test/quote-box" className="rounded-2xl py-2 text-[#c46b8d]">
-            <div className="text-lg leading-none">▱</div>
-            <div className="mt-1">견적함</div>
-          </Link>
-          <Link href="/artists" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">⌕</div>
-            <div className="mt-1">찾기</div>
-          </Link>
-          <Link href="/mypage" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">○</div>
-            <div className="mt-1">마이</div>
-          </Link>
-        </div>
-      </nav>
     </main>
+  );
+}
+
+function CostCard({
+  title,
+  value,
+  desc,
+  highlight,
+}: {
+  title: string;
+  value: string;
+  desc: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-[22px] p-4 ring-1 ${
+        highlight
+          ? "bg-[#f8eef2] ring-[#ead0dc]"
+          : "bg-[#fdfcff] ring-[#ece8f0]"
+      }`}
+    >
+      <p className="text-[11px] font-black text-[#8b7d86]">{title}</p>
+      <p
+        className={`mt-2 text-[24px] font-black tracking-[-0.06em] ${
+          highlight ? "text-[#c46b8d]" : "text-[#222237]"
+        }`}
+      >
+        {value}
+      </p>
+      <p className="mt-1 text-[11px] font-bold leading-5 text-[#6d6876]">
+        {desc}
+      </p>
+    </div>
   );
 }
 
@@ -502,6 +593,63 @@ function MiniStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-[18px] bg-[#fdfcff] px-3 py-3 text-center ring-1 ring-[#ece8f0]">
       <p className="text-[11px] font-bold text-[#8b7d86]">{label}</p>
       <p className="mt-1 text-lg font-black text-[#222237]">{value}</p>
+    </div>
+  );
+}
+
+function StandardTableRow({ item }: { item: StandardField }) {
+  return (
+    <div className="grid grid-cols-[0.9fr_1.1fr_1.2fr] items-center gap-3 px-3 py-4">
+      <p className="text-[12px] font-black leading-[1.35] text-[#222237]">
+        {item.label}
+      </p>
+
+      <p className="text-center text-[13px] font-black leading-[1.35] text-[#c46b8d]">
+        {item.value}
+      </p>
+
+      <p className="text-right text-[11px] font-bold leading-[1.45] text-[#6d6876]">
+        {item.note}
+      </p>
+    </div>
+  );
+}
+
+function OptionCard({ item }: { item: OptionItem }) {
+  const riskClass =
+    item.risk === "high"
+      ? "bg-[#fff1e8] text-[#e58a5c]"
+      : item.risk === "medium"
+        ? "bg-[#f8eef2] text-[#c46b8d]"
+        : "bg-[#eaf7ef] text-[#3ca56b]";
+
+  const riskLabel =
+    item.risk === "high"
+      ? "금액 변동 큼"
+      : item.risk === "medium"
+        ? "선택 주의"
+        : "부담 낮음";
+
+  return (
+    <div className="rounded-[22px] bg-[#fdfcff] p-4 ring-1 ring-[#ece8f0]">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[13px] font-black text-[#222237]">{item.title}</p>
+          <p className="mt-1 text-[11px] font-bold leading-5 text-[#6d6876]">
+            {item.desc}
+          </p>
+        </div>
+
+        <p className="shrink-0 text-[15px] font-black text-[#c46b8d]">
+          {item.price}
+        </p>
+      </div>
+
+      <span
+        className={`mt-3 inline-flex rounded-full px-3 py-1 text-[10px] font-black ${riskClass}`}
+      >
+        {riskLabel}
+      </span>
     </div>
   );
 }
@@ -519,7 +667,9 @@ function SectionHeader({
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
         <div className="text-[#c46b8d]">{icon}</div>
-        <h2 className="text-xl font-black tracking-[-0.04em]">{title}</h2>
+        <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em]">
+          {title}
+        </h2>
       </div>
 
       <span className="rounded-full bg-[#f8eef2] px-3 py-1 text-xs font-black text-[#c46b8d]">
@@ -529,40 +679,36 @@ function SectionHeader({
   );
 }
 
-function AnalysisCard({ item }: { item: AnalysisCard }) {
+function AnalysisCard({
+  title,
+  value,
+  desc,
+  level,
+}: {
+  title: string;
+  value: string;
+  desc: string;
+  level: "good" | "check" | "neutral";
+}) {
   return (
     <div className="rounded-[22px] bg-[#fdfcff] p-4 ring-1 ring-[#ece8f0]">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-black text-[#222237]">{item.title}</p>
+        <p className="text-[13px] font-black text-[#222237]">{title}</p>
         <span
           className={`rounded-full px-2 py-1 text-[10px] font-black ${
-            item.level === "good"
+            level === "good"
               ? "bg-[#f8eef2] text-[#c46b8d]"
-              : item.level === "check"
+              : level === "check"
                 ? "bg-[#fff3e8] text-[#e58a5c]"
                 : "bg-[#f1eef3] text-[#8b7d86]"
           }`}
         >
-          {item.value}
+          {value}
         </span>
       </div>
 
       <p className="mt-3 text-xs font-bold leading-5 text-[#6d6876]">
-        {item.desc}
-      </p>
-    </div>
-  );
-}
-
-function StandardCard({ item }: { item: StandardField }) {
-  return (
-    <div className="rounded-[22px] bg-[#fdfcff] p-4 ring-1 ring-[#ece8f0]">
-      <p className="text-xs font-black text-[#8b7d86]">{item.label}</p>
-      <p className="mt-2 text-xl font-black tracking-[-0.04em]">
-        {item.value}
-      </p>
-      <p className="mt-1 text-xs font-bold leading-5 text-[#6d6876]">
-        {item.note}
+        {desc}
       </p>
     </div>
   );
@@ -606,7 +752,7 @@ function MissingCard({ item }: { item: StandardField }) {
 
 function QuestionItem({ text }: { text: string }) {
   return (
-    <div className="rounded-[18px] bg-[#f8eef2] px-4 py-4 text-sm font-black leading-6 text-[#222237]">
+    <div className="rounded-[18px] bg-[#f8eef2] px-4 py-4 text-[13px] font-black leading-6 text-[#222237]">
       {text}
     </div>
   );

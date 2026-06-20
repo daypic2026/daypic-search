@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const categories = [
-  { id: "wedding-snap", icon: "📷", title: "본식스냅(서브,아이폰)" },
+  { id: "wedding-snap", icon: "📷", title: "본식스냅" },
   { id: "wedding-video", icon: "🎥", title: "본식영상" },
   { id: "wedding-hall", icon: "🏛️", title: "웨딩홀" },
   { id: "dress", icon: "👗", title: "드레스" },
@@ -42,16 +43,29 @@ export default function QuoteAddPage() {
 
     localStorage.setItem("quoteDraft", JSON.stringify(quoteData));
 
-console.log("quoteData:", quoteData);
+    console.log("quoteData:", quoteData);
 
-router.push("/test/quote-processing");
+    router.push("/test/quote-processing");
   };
 
   return (
     <main className="min-h-screen bg-[#fdfcff] text-[#222237]">
-      <div className="mx-auto min-h-screen max-w-5xl px-5 pb-36 pt-5 sm:px-8 lg:px-10">
+      <div className="mx-auto min-h-screen max-w-5xl px-5 pb-52 pt-5 sm:px-8 lg:px-10">
         <section className="relative overflow-hidden rounded-[30px] bg-white px-6 py-7 shadow-sm ring-1 ring-[#ece8f0] sm:px-10 sm:py-10">
           <div className="absolute -right-14 -top-14 h-36 w-36 rounded-full bg-[#f4e8f0]" />
+          <div className="absolute right-8 bottom-10 hidden h-20 w-20 rounded-[28px] bg-[#f7f3fa] sm:block" />
+
+          <div className="absolute right-5 top-14 z-20">
+            <div className="relative h-[110px] w-[145px] sm:h-[155px] sm:w-[205px]">
+              <Image
+                src="/daypic2/character1.png"
+                alt="DayPic 견적 입력 캐릭터"
+                fill
+                priority
+                className="object-contain"
+              />
+            </div>
+          </div>
 
           <div className="relative z-10">
             <div className="flex items-center justify-between gap-3">
@@ -62,26 +76,24 @@ router.push("/test/quote-processing");
                 DayPic 2.0
               </Link>
 
-              <Link
-                href="/test/quote-box"
-                className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-extrabold text-[#c46b8d] shadow-sm ring-1 ring-[#efe1e8]"
-              >
-                내 견적함 ›
-              </Link>
+              
             </div>
 
-            <div className="mt-8 sm:mt-10">
-              <p className="text-sm font-black text-[#c46b8d]">견적 추가</p>
+            <div className="mt-8 max-w-[560px] sm:mt-10">
+              <p className="text-xs font-black text-[#c46b8d] sm:text-sm">
+                견적 추가
+              </p>
 
-              <h1 className="mt-3 text-[28px] font-black leading-[1.22] tracking-[-0.055em] sm:text-[42px]">
+              <h1 className="mt-3 text-[20px] font-black leading-[1.35] tracking-[-0.055em] sm:text-[42px]">
                 받은 견적을
                 <br />
                 <span className="text-[#c46b8d]">그대로 붙여넣어</span>{" "}
                 주세요
               </h1>
 
-              <p className="mt-4 max-w-2xl text-[14px] leading-6 text-[#6d6876] sm:text-[16px] sm:leading-7">
+              <p className="mt-4 max-w-2xl text-[13px] leading-6 text-[#6d6876] sm:text-[16px] sm:leading-7">
                 카카오톡, DM, 문자, 이메일로 받은 견적을 복사해서 넣으면
+                <br className="hidden sm:block" />
                 AI가 가격, 구성, 확인할 항목을 정리해요.
               </p>
             </div>
@@ -89,8 +101,8 @@ router.push("/test/quote-processing");
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-xl font-black tracking-[-0.04em]">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em]">
               견적 정보
             </h2>
 
@@ -101,8 +113,10 @@ router.push("/test/quote-processing");
 
           <div className="mb-5">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-black text-[#222237]">업종 선택</p>
-              <p className="text-xs font-bold text-[#9d929d]">
+              <p className="text-[13px] font-black text-[#222237]">
+                업종 선택
+              </p>
+              <p className="max-w-[170px] truncate text-right text-xs font-bold text-[#9d929d]">
                 {selectedCategoryLabel}
               </p>
             </div>
@@ -116,13 +130,13 @@ router.push("/test/quote-processing");
                     key={category.id}
                     type="button"
                     onClick={() => setSelectedCategory(category.id)}
-                    className={`flex h-12 items-center gap-2 rounded-[18px] border px-3 text-sm font-black transition active:scale-[0.98] ${
+                    className={`flex h-11 items-center gap-2 rounded-[16px] border px-3 text-[13px] font-black transition active:scale-[0.98] ${
                       isSelected
                         ? "border-[#c46b8d] bg-[#f8eef2] text-[#c46b8d]"
                         : "border-[#ece8f0] bg-[#fdfcff] text-[#222237]"
                     }`}
                   >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[13px]">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[12px]">
                       {category.icon}
                     </span>
                     <span className="truncate">{category.title}</span>
@@ -133,9 +147,9 @@ router.push("/test/quote-processing");
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-black text-[#222237]">
+            <label className="mb-2 block text-[13px] font-black text-[#222237]">
               업체명
-              <span className="ml-1 text-xs font-bold text-[#9d929d]">
+              <span className="ml-1 text-[11px] font-bold text-[#9d929d]">
                 선택 입력
               </span>
             </label>
@@ -144,16 +158,16 @@ router.push("/test/quote-processing");
               value={vendorName}
               onChange={(e) => setVendorName(e.target.value)}
               placeholder="예) 상담받은 업체"
-              className="h-14 w-full rounded-[20px] border border-[#ece8f0] bg-[#fdfcff] px-4 text-[15px] font-bold text-[#222237] outline-none placeholder:text-[#b7aab3] focus:border-[#c46b8d]"
+              className="h-[52px] w-full rounded-[18px] border border-[#ece8f0] bg-[#fdfcff] px-4 text-[14px] font-bold text-[#222237] outline-none placeholder:text-[#b7aab3] focus:border-[#c46b8d]"
             />
 
-            <p className="mt-2 text-xs font-bold text-[#8b7d86]">
+            <p className="mt-2 text-[11px] font-bold text-[#8b7d86]">
               업체명이 없어도 분석할 수 있어요.
             </p>
           </div>
 
           <div className="mt-5">
-            <label className="mb-2 block text-sm font-black text-[#222237]">
+            <label className="mb-2 block text-[13px] font-black text-[#222237]">
               견적 내용
             </label>
 
@@ -173,15 +187,15 @@ router.push("/test/quote-processing");
 당일~5일 전달
 
 계약서 작성 가능 여부 문의`}
-              className="h-[310px] w-full resize-none rounded-[24px] border border-[#ece8f0] bg-[#fdfcff] p-5 text-[15px] font-medium leading-relaxed text-[#222237] outline-none placeholder:text-[#b7aab3] focus:border-[#c46b8d]"
+              className="h-[290px] w-full resize-none rounded-[22px] border border-[#ece8f0] bg-[#fdfcff] p-4 text-[14px] font-medium leading-6 text-[#222237] outline-none placeholder:text-[#b7aab3] focus:border-[#c46b8d]"
             />
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-4">
-            <p className="text-xs font-bold text-[#8b7d86]">
+            <p className="text-[11px] font-bold text-[#8b7d86]">
               붙여넣은 내용에서 가격, 구성, 확인할 항목을 찾아요.
             </p>
-            <p className="shrink-0 text-xs font-bold text-[#8b7d86]">
+            <p className="shrink-0 text-[11px] font-bold text-[#8b7d86]">
               {quoteText.length} / 5000
             </p>
           </div>
@@ -189,7 +203,7 @@ router.push("/test/quote-processing");
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`mt-6 flex h-[56px] w-full items-center justify-center rounded-[22px] text-[15px] font-black transition active:scale-[0.98] ${
+            className={`mt-5 flex h-[52px] w-full items-center justify-center rounded-[20px] text-[15px] font-black transition active:scale-[0.98] ${
               canSubmit
                 ? "bg-[#c46b8d] text-white shadow-lg shadow-[#c46b8d]/25"
                 : "bg-[#f1e6eb] text-[#a99ba4]"
@@ -200,11 +214,11 @@ router.push("/test/quote-processing");
         </section>
 
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm ring-1 ring-[#ece8f0] sm:p-7">
-          <h2 className="text-xl font-black tracking-[-0.04em]">
+          <h2 className="text-[20px] font-black leading-[1.35] tracking-[-0.055em]">
             이렇게 정리돼요
           </h2>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-2">
             <InfoItem title="가격과 구성을 분리해요" />
             <InfoItem title="누락된 확인 항목을 찾아요" />
             <InfoItem title="비교 결과와 질문 문장을 만들어요" />
@@ -212,12 +226,12 @@ router.push("/test/quote-processing");
         </section>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t from-[#fdfcff] via-[#fdfcff] to-transparent px-5 pb-5 pt-8">
+      <div className="fixed bottom-[74px] left-0 right-0 z-40 bg-gradient-to-t from-[#fdfcff] via-[#fdfcff] to-transparent px-5 pb-4 pt-8">
         <div className="mx-auto max-w-5xl">
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`flex h-[56px] w-full items-center justify-center rounded-[22px] text-[15px] font-black transition active:scale-[0.98] ${
+            className={`flex h-[52px] w-full items-center justify-center rounded-[20px] text-[15px] font-black transition active:scale-[0.98] ${
               canSubmit
                 ? "bg-[#c46b8d] text-white shadow-lg shadow-[#c46b8d]/25"
                 : "bg-[#f1e6eb] text-[#a99ba4]"
@@ -233,11 +247,13 @@ router.push("/test/quote-processing");
 
 function InfoItem({ title }: { title: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-[18px] bg-[#f8eef2] px-4 py-4">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#c46b8d] text-xs font-black text-white">
+    <div className="flex items-center gap-3 rounded-[18px] bg-[#f8eef2] px-4 py-3">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#c46b8d] text-[10px] font-black text-white">
         ✓
       </div>
-      <p className="text-sm font-black text-[#222237]">{title}</p>
+      <p className="text-[13px] font-black leading-[1.35] text-[#222237]">
+        {title}
+      </p>
     </div>
   );
 }
