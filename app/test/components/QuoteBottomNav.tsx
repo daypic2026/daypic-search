@@ -7,7 +7,7 @@ const navItems = [
   { label: "홈", href: "/test", icon: "⌂" },
   { label: "견적추가", href: "/test/quote-add", icon: "+" },
   { label: "견적함", href: "/test/quote-box", icon: "▱" },
-  { label: "찾기", href: "/", icon: "⌕" },
+  { label: "작가찾기", href: "/", icon: "⌕" },
   { label: "마이", href: "/test/mypage", icon: "○" },
 ];
 

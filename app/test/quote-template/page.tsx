@@ -2,21 +2,21 @@ import Link from "next/link";
 
 const templates = [
   {
-    href: "/quote-template/snap",
+    href: "/test/quote-template/snap",
     icon: "📸",
     title: "본식스냅 견적서",
     desc: "촬영구성 · 결과물 · 납품일정 · 추가비용",
     tag: "가장 먼저 만들기 추천",
   },
   {
-    href: "/quote-template/video",
+    href: "/test/quote-template/video",
     icon: "🎥",
     title: "본식영상 견적서",
     desc: "촬영구성 · 영상구성 · 하이라이트 · 납품일정",
     tag: "준비중",
   },
   {
-    href: "/quote-template/iphone",
+    href: "/test/quote-template/iphone",
     icon: "📱",
     title: "아이폰스냅 견적서",
     desc: "촬영구성 · 원본전달 · 릴스제작 · 납품속도",

@@ -234,30 +234,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[#ece8f0] bg-white/95 backdrop-blur">
-        <div className="mx-auto grid max-w-5xl grid-cols-5 px-2 py-2 text-center text-[11px] font-semibold text-[#aaa0aa]">
-          <Link href="/" className="rounded-2xl py-2 text-[#c46b8d]">
-            <div className="text-lg leading-none">⌂</div>
-            <div className="mt-1">홈</div>
-          </Link>
-          <Link href="/test/quote-add" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">＋</div>
-            <div className="mt-1">견적추가</div>
-          </Link>
-          <Link href="/test/quote-box" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">▱</div>
-            <div className="mt-1">견적함</div>
-          </Link>
-          <Link href="/artists" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">⌕</div>
-            <div className="mt-1">찾기</div>
-          </Link>
-          <Link href="/mypage" className="rounded-2xl py-2">
-            <div className="text-lg leading-none">○</div>
-            <div className="mt-1">마이</div>
-          </Link>
-        </div>
-      </nav>
+      
     </main>
   );
 }

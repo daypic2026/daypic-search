@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const ADMIN_INQUIRY_URL = "https://pf.kakao.com/_YOUR_CHANNEL_LINK";
+const ADMIN_INQUIRY_URL = "http://pf.kakao.com/_xaaguX/chat";
 
 const headerButtonClass =
   "inline-flex h-[44px] min-w-[116px] items-center justify-center rounded-full border border-[#dccff2] bg-white px-5 text-[14px] font-semibold text-[#4d426b] transition-colors duration-200 hover:border-[#2c2448] hover:bg-[#2c2448] hover:text-white active:border-[#2c2448] active:bg-[#2c2448] active:text-white";
